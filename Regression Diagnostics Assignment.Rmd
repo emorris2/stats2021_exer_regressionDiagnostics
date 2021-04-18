@@ -48,7 +48,7 @@ for (i in packages){
 }
 ```
 
-```{r}
+```{r eval=FALSE}
 # load each package into memory so it can be used in the script
 for (i in packages){
   library(i,character.only=TRUE)
@@ -65,7 +65,7 @@ Regression diagnostics should be performed when fitting a linear model to assess
 
 The rio package works for importing several different types of data files. We're going to use it in this class. There are other packages which can be used to open datasets in R. You can see several options by clicking on the Import Dataset menu under the Environment tab in RStudio. (For a csv file like we have this week we'd use either From Text(base) or From Text (readr). Try it out to see the menu dialog.)
 
-```{r}
+```{r eval=FALSE}
 # Using the file.choose() command allows you to select a file to import from another folder.
 # dataset <- rio::import(file.choose())
 dataset <- rio::import("Album Sales.sav")
@@ -77,13 +77,13 @@ Many linear models are calculated in R using the lm() function. We'll look at ho
 
 #### Visualization
 
-```{r}
+```{r eval=FALSE}
 # This code creates a scatter matrix
 library(GGally)
 GGally::ggpairs(dataset, columns=c('Sales','Adverts','Airplay','Image'), lower = list(continuous = "smooth"))
 ```
 
-```{r}
+```{r eval=FALSE}
 # This code creates a scatterplot between a single pair of variables
 ggplot(dataset, aes(x = Adverts, y = Sales)) +
   geom_point() +
@@ -94,7 +94,7 @@ ggplot(dataset, aes(x = Adverts, y = Sales)) +
 
 Multiple models adding variables in steps can be created in R using the lm() and update() functions.
 
-```{r}
+```{r eval=FALSE}
 model.1 <- lm(formula = Sales ~ Adverts, data = dataset)
 model.2 <- update(model.1, .~. + Airplay)
 model.3 <- update(model.2, .~. + Image)
@@ -102,7 +102,7 @@ model.3 <- update(model.2, .~. + Image)
 
 #### Model assessment
 
-```{r}
+```{r eval=FALSE}
 summary(model.1)
 summary(model.2)
 summary(model.3)
@@ -112,14 +112,14 @@ summary(model.3)
 
 You might notice lm() does not provide the standardized residuals. Those must me calculated separately.
 
-```{r}
+```{r eval=FALSE}
 standardized = lm(scale(Sales) ~ scale(Adverts) + scale(Airplay) + scale(Image), data=dataset)
 summary(standardized)
 ```
 
 Another option for getting standardized residuals is in the QuantPsyc package.
 
-```{r}
+```{r eval=FALSE}
 QuantPsyc::lm.beta(model.3)
 ```
 
@@ -127,7 +127,7 @@ QuantPsyc::lm.beta(model.3)
 
 The lm() function didn't provide confidence intervals for the model parameters. This can be done using the confint() function.
 
-```{r}
+```{r eval=FALSE}
 confint(model.3)
 ```
 
@@ -135,7 +135,7 @@ confint(model.3)
 
 From https://ssc.wisc.edu/sscc/pubs/RFR/RFR_Regression.html
 
-```{r}
+```{r eval=FALSE}
 # Smaller values indicate a better model
 AIC(model.1)
 AIC(model.2)
@@ -150,7 +150,7 @@ BIC(model.3)
 
 Hierarchal models can be compared using ANOVA.
 
-```{r}
+```{r eval=FALSE}
 anova(model.1, model.2, model.3)
 ```
 
@@ -158,7 +158,7 @@ anova(model.1, model.2, model.3)
 
 #### Add observation statistics to data (missing in Jamovi)
 
-```{r}
+```{r eval=FALSE}
 # add ID column
 dataset$id = 1:nrow(dataset)
 
@@ -182,7 +182,7 @@ dataset$fitted <- round(model.3$fitted.values, digits = 3)
 After I created a lot of this code, I ran across a function to get a lot of regression diagnostics quickly. The site seems to give some examples using more tidyverse notation.
 From http://www.sthda.com/english/articles/39-regression-model-diagnostics/161-linear-regression-assumptions-and-diagnostics-in-r-essentials/
 
-```{r}
+```{r eval=FALSE}
 model.diag.metrics <- broom::augment(model.3)
 head(model.diag.metrics)
 ```
@@ -190,7 +190,7 @@ head(model.diag.metrics)
 
 #### Flag cases for investigation
 
-```{r}
+```{r eval=FALSE}
 # studentized residuals greater than 2 (or 3)
 # No more than 5% of cases above 2. No more than 1% above 2.5.
 print("Studentized residuals greater than 2 or 3")
@@ -233,7 +233,7 @@ dataset[dataset$largedffit, c("id")]
 
 There is another function in R to help flag potentially influential cases
 
-```{r}
+```{r eval=FALSE}
 # https://web.stanford.edu/class/stats191/notebooks/Diagnostics_for_multiple_regression.html
 influence.measures(model.3)
 
@@ -241,7 +241,7 @@ influence.measures(model.3)
 
 Some more plots looking for outliers.
 
-```{r}
+```{r eval=FALSE}
 car::outlierTest(model.3)
 qqPlot(model.3, main="QQ Plot")
 leveragePlots(model.3)
@@ -253,7 +253,7 @@ leveragePlots(model.3)
 This site is the worst to navigate, but they have some plots and tests the others don't.
 https://stats.idre.ucla.edu/wp-content/uploads/2019/02/R_reg_part2.html#(4)
 
-```{r}
+```{r eval=FALSE}
 # https://stats.idre.ucla.edu/wp-content/uploads/2019/02/R_reg_part2.html#(4)
 plot(model.3, which = 4, cook.levels = cutoff)
 influencePlot(model.3, main="Influence Plot", sub="Circle size proportional to Cook's Distance")
@@ -271,7 +271,7 @@ print(index)
 
 Nice plot to identify high leverage values.
 
-```{r}
+```{r eval=FALSE}
 #a vector containing the diagonal of the 'hat' matrix
 h <- influence(model.3)$hat
 #half normal plot of leverage from package faraway
@@ -283,7 +283,7 @@ halfnorm(influence(model.3)$hat, ylab = "leverage")
 
 May be helpful in identifying influential cases.
 
-```{r}
+```{r eval=FALSE}
 # https://web.stanford.edu/class/stats191/notebooks/Diagnostics_for_multiple_regression.html
 # If the partial regression relationship is linear, this plot should look linear.
 avPlots(model.3, 'Adverts')
@@ -295,7 +295,7 @@ avPlots(model.3, 'Image')
 
 Similar to the Added Variable plot, but may be more helpful in identifying non-linear relationships.
 
-```{r}
+```{r eval=FALSE}
 # https://web.stanford.edu/class/stats191/notebooks/Diagnostics_for_multiple_regression.html
 # The green line is a non-parametric smooth of the scatter plot that may suggest
 # relationship other than linear.
@@ -313,7 +313,7 @@ This is based on how well the model meets statistical assumptions.
 
 Check scatterplots for linear relationships of predictors with outcome.
 
-```{r}
+```{r eval=FALSE}
 # no curve in the graph
 # first plot - plot fitted values against residuals
 plot(model.3)
@@ -322,14 +322,14 @@ plot(model.3)
 Residual plots can help check for linearity.
 From https://stats.idre.ucla.edu/wp-content/uploads/2019/02/R_reg_part2.html#(6)
 
-```{r}
+```{r eval=FALSE}
 car::residualPlots(model.3)
 ```
 
 
 #### Independent errors
 
-```{r}
+```{r eval=FALSE}
 # value less than 1 or greater than 3 problematic
 # close to 2 is best
 durbinWatsonTest(model.3)
@@ -339,14 +339,14 @@ dwt(model.3)
 You can also plot residuals with ID
 From https://stats.idre.ucla.edu/wp-content/uploads/2019/02/R_reg_part2.html#(7)
 
-```{r}
+```{r eval=FALSE}
 plot(model.3$resid ~ dataset$id)
 ```
 
 
 #### Homoscedasticity
 
-```{r}
+```{r eval=FALSE}
 # no funneling
 # first plot - plot fitted values against residuals
 plot(model.3)
@@ -358,7 +358,7 @@ bptest(model.3)
 
 #### Normally distributed errors
 
-```{r}
+```{r eval=FALSE}
 # Q-Q plot of residuals for normality
 # second plot - points follow the line
 plot(model.3)
@@ -384,7 +384,7 @@ All variables should be quantitative. Categorical variables should only have 2 c
 
 You can check pair-wise correlations between predictors before fitting the model. Correlations above .8 could be problematic.
 
-```{r}
+```{r eval=FALSE}
 # largest VIF greater than 10 problematic
 # Average VIF greater than 1 regression may be biased
 # tolerance less than .1 a serious problem
@@ -407,7 +407,7 @@ How well does the model predict outcome from a different sample?
 
 Save the dataset with your new regression diagnostics variables.
 
-```{r}
+```{r eval=FALSE}
 # can use with .sav, .rds. .csv files and more
 # see documentation for options https://www.rdocumentation.org/packages/rio/versions/0.5.16
 rio::export(dataset, "Album Sales Diagnostics.sav")
